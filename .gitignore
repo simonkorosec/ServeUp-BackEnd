@@ -102,3 +102,12 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# PyCharm
+.idea/workspace.xml
+.idea/vcs.xml
+.idea/ServeUp_BackEnd.iml
+.idea/modules.xml
+.idea/misc.xml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/libraries/Django_Lib.xml
