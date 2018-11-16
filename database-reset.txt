@@ -1,0 +1,8 @@
+# reset the database before pushing
+heroku pg:reset postgresql-opaque-40940 --app serveup-backend --confirm serveup-backend
+
+# push the local database to the heroku data stores
+heroku pg:push serveuplocaldb postgresql-opaque-40940 --app serveup-backend
+
+# pull the heroku database and store it localy
+heroku pg:pull postgresql-opaque-40940 serveuplocaldb --app serveup-backend
