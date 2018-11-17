@@ -76,8 +76,12 @@ WSGI_APPLICATION = 'ServeUp_BackEnd.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'TestDataBase2'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': '#ADD_LOCAL_DB_NAME',
+        'USER': '#ADD_USER_NAME',
+        'PASSWORD': '#ADD_PASSWORD',
+        'HOST': 'localhost',
+        'PORT': '#ADD_PORT',
     }
 }
 
