@@ -12,6 +12,12 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 import django_heroku
+import environ
+
+
+env = environ.Env(DEBUG=(bool, False),)
+root = environ.Path(__file__) - 2   # move to the root of the project
+env.read_env(root('.env'))          # read the .env file throws a warning if missing
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,9 +29,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '+%)%&^nk&$oh8b8y8_haz_hh*z2=o+32$+w-=b5!y0dl70@c5x'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['serveup-backend.herokuapp.com']
 
 # Application definition
 
@@ -75,15 +81,20 @@ WSGI_APPLICATION = 'ServeUp_BackEnd.wsgi.application'
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': '#ADD_LOCAL_DB_NAME',
-        'USER': '#ADD_USER_NAME',
-        'PASSWORD': '#ADD_PASSWORD',
-        'HOST': 'localhost',
-        'PORT': '#ADD_PORT',
-    }
+    'default': env.db(),
 }
+DATABASES['default']['ATOMIC_REQUESTS'] = True
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': '#ADD_LOCAL_DB_NAME',
+#         'USER': '#ADD_USER_NAME',
+#         'PASSWORD': '#ADD_PASSWORD',
+#         'HOST': 'localhost',
+#         'PORT': '#ADD_PORT',
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
