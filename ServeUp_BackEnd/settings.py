@@ -85,17 +85,6 @@ DATABASES = {
 }
 DATABASES['default']['ATOMIC_REQUESTS'] = True
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': '#ADD_LOCAL_DB_NAME',
-#         'USER': '#ADD_USER_NAME',
-#         'PASSWORD': '#ADD_PASSWORD',
-#         'HOST': 'localhost',
-#         'PORT': '#ADD_PORT',
-#     }
-# }
-
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
 
