@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ServeUp.models import Restavracija
+from ServeUp.models import Restavracija, Posta
 
 """
 Convert received data from JSON to Django model and the other way around
@@ -13,4 +13,10 @@ class RestavracijaSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Restavracija
-        fields = ('restaurant_name', 'rating')
+        fields = ('ime_restavracije', 'ocena')
+
+
+class PostaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Posta
+        fields = ('postna_stevilka', 'kraj')

@@ -1,13 +1,15 @@
 # This is an auto-generated Django model module.
 from django.db import models
 
+
 # TODO: * Make sure each ForeignKey has `on_delete` set to the desired behavior.
 
 
 class Jed(models.Model):
     id_jed = models.IntegerField(primary_key=True)
     id_jedilni_list = models.ForeignKey('JedilniList', models.DO_NOTHING, db_column='id_jedilni_list')
-    id_restavracija = models.ForeignKey('Restavracija', models.DO_NOTHING, db_column='id_restavracija', blank=True, null=True)
+    id_restavracija = models.ForeignKey('Restavracija', models.DO_NOTHING, db_column='id_restavracija', blank=True,
+                                        null=True)
     ime_jedi = models.CharField(max_length=256)
     cena = models.FloatField()
     opis = models.CharField(max_length=256)
@@ -17,7 +19,7 @@ class Jed(models.Model):
 
 
 class JediNarocila(models.Model):
-    id_jed = models.ForeignKey(Jed, models.DO_NOTHING, db_column='id_jed', primary_key=True)
+    id_jed = models.OneToOneField(Jed, models.DO_NOTHING, db_column='id_jed', primary_key=True)
     id_narocila = models.ForeignKey('Narocilo', models.DO_NOTHING, db_column='id_narocila')
 
     class Meta:
@@ -91,7 +93,8 @@ class TipRestavracije(models.Model):
 class Uporabnik(models.Model):
     id_uporabnik = models.IntegerField(primary_key=True)
     id_vloga = models.ForeignKey('Vloga', models.DO_NOTHING, db_column='id_vloga')
-    e_mail = models.CharField(db_column='E-mail', max_length=256)  # Field name made lowercase. Field renamed to remove unsuitable characters.
+    e_mail = models.CharField(db_column='E-mail',
+                              max_length=256)  # Field name made lowercase. Field renamed to remove unsuitable characters.
     geslo = models.CharField(max_length=256)
 
     class Meta:
@@ -99,7 +102,8 @@ class Uporabnik(models.Model):
 
 
 class Upravlja(models.Model):
-    id_restavracija = models.ForeignKey(Restavracija, models.DO_NOTHING, db_column='id_restavracija', primary_key=True)
+    id_restavracija = models.OneToOneField(Restavracija, models.DO_NOTHING, db_column='id_restavracija',
+                                           primary_key=True)
     id_uporabnik = models.ForeignKey(Uporabnik, models.DO_NOTHING, db_column='id_uporabnik')
 
     class Meta:
@@ -116,7 +120,8 @@ class Vloga(models.Model):
 
 
 class Vsebuje(models.Model):
-    id_jed = models.ForeignKey(Jed, models.DO_NOTHING, db_column='id_jed', primary_key=True)
+    # id_jed = models.ForeignKey(Jed, models.DO_NOTHING, db_column='id_jed', primary_key=True)
+    id_jed = models.OneToOneField(Jed, models.DO_NOTHING, db_column='id_jed', primary_key=True)
     id_sestavine = models.ForeignKey(Sestavine, models.DO_NOTHING, db_column='id_sestavine')
 
     class Meta:
