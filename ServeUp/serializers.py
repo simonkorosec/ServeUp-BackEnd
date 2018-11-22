@@ -18,9 +18,9 @@ class PostaSerializer(serializers.ModelSerializer):
         fields = ('postna_stevilka', 'kraj')
 
 
-class UporabnikSerializer(serializers.ModelSerializer):
+class AdminUporabnikSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Uporabnik
+        model = AdminUporabnik
         fields = ('email', 'password')
         write_only_fields = ['password']
 
