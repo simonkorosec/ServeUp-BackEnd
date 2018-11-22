@@ -37,6 +37,7 @@ INTERNAL_IPS = ['127.0.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
+    'django.contrib.admindocs',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -104,6 +105,9 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# AUTH_USER_MODEL = 'accounts.User'
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/

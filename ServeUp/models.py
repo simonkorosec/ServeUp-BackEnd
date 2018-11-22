@@ -1,5 +1,7 @@
 # This is an auto-generated Django model module.
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser
+from ServeUp.Views.userManager import MyUserManager
 
 
 # TODO: * Make sure each ForeignKey has `on_delete` set to the desired behavior.
@@ -99,27 +101,15 @@ class TipRestavracije(models.Model):
         db_table = 'tip_restavracije'
 
 
-class Uporabnik(models.Model):
-    id_uporabnik = models.AutoField(primary_key=True)
-    id_vloga = models.ForeignKey('Vloga', models.DO_NOTHING, db_column='id_vloga')
-    e_mail = models.TextField(
-        db_column='E-mail')  # Field name made lowercase. Field renamed to remove unsuitable characters.
-    geslo = models.TextField()
-
-    class Meta:
-        managed = False
-        db_table = 'uporabnik'
-
-
-class Upravlja(models.Model):
-    id_restavracija = models.ForeignKey(Restavracija, on_delete=models.CASCADE, db_column='id_restavracija',
-                                        primary_key=True)
-    id_uporabnik = models.ForeignKey(Uporabnik, on_delete=models.CASCADE, db_column='id_uporabnik')
-
-    class Meta:
-        managed = False
-        db_table = 'upravlja'
-        unique_together = (('id_restavracija', 'id_uporabnik'), ('id_restavracija', 'id_uporabnik'),)
+# class Upravlja(models.Model):
+#     id_restavracija = models.ForeignKey(Restavracija, on_delete=models.CASCADE, db_column='id_restavracija',
+#                                         primary_key=True)
+#     id_uporabnik = models.ForeignKey(Uporabnik, on_delete=models.CASCADE, db_column='id_uporabnik')
+#
+#     class Meta:
+#         managed = False
+#         db_table = 'upravlja'
+#         unique_together = (('id_restavracija', 'id_uporabnik'), ('id_restavracija', 'id_uporabnik'),)
 
 
 class Vloga(models.Model):
@@ -139,3 +129,30 @@ class Vsebuje(models.Model):
         managed = False
         db_table = 'vsebuje'
         unique_together = (('id_jed', 'id_sestavine'), ('id_jed', 'id_sestavine'),)
+
+
+class Uporabnik(AbstractBaseUser):
+    email = models.EmailField(
+        verbose_name='email address',
+        max_length=255,
+        unique=True,
+    )
+
+    objects = MyUserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    class Meta:
+        managed = False
+        db_table = 'uporabnik'
+
+    def has_perm(self, perm, obj=None):
+        """Does the user have a specific permission?"""
+        # Simplest possible answer: Yes, always
+        return True
+
+    def has_module_perms(self, app_label):
+        """Does the user have permissions to view the app `app_label`?"""
+        # Simplest possible answer: Yes, always
+        return True

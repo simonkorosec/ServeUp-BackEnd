@@ -1,8 +1,7 @@
-from rest_framework.decorators import action
 from rest_framework import viewsets
 from url_filter.integrations.drf import \
     DjangoFilterBackend  # https://github.com/miki725/django-url-filter - how to use filters
-from ServeUp.models import *
+
 from ServeUp.serializers import *
 
 """
@@ -13,7 +12,7 @@ APIView and Response libraries
 """
 
 
-class RestaurantViewSet(viewsets.ModelViewSet):
+class RestavracijaViewSet(viewsets.ModelViewSet):
     """
     ViewSet provides 'list', 'create', 'retrieve', 'update' and 'destroy' actions
 
@@ -40,15 +39,23 @@ class PostaViewSet(viewsets.ModelViewSet):
 
 
 class UporabnikViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet provides 'list', 'create', 'retrieve', 'update' and 'destroy' actions
-
-    Additional actions can be added using '@action()' decorator, default response
-    is GET, you can add POST using 'methods' argument
-    """
-    filter_backends = [DjangoFilterBackend]
-    filter_fields = ['id_vloga', 'e_mail']
-
     serializer_class = UporabnikSerializer
     queryset = Uporabnik.objects.all()
     model = Uporabnik
+
+    # def create(self, request, *args, **kwargs):
+    #     data = {}
+    #
+    #     # check if data is in correct format
+    #     if type(request.data) is QueryDict:
+    #         tmp = dict(request.data)
+    #         data['email'] = tmp['email'][0]  # email and password are stored as a list
+    #         data['password'] = tmp['password'][0]  # so we have wot change them
+    #     elif type(request.data) is dict:
+    #         data = request.data
+    #
+    #     serializer = UporabnikSerializer(data=data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return JsonResponse(serializer.data, status=201)
+    #     return JsonResponse(serializer.errors, status=400)
