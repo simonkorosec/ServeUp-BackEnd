@@ -14,10 +14,9 @@ import os
 import django_heroku
 import environ
 
-
-env = environ.Env(DEBUG=(bool, False),)
-root = environ.Path(__file__) - 2   # move to the root of the project
-env.read_env(root('.env'))          # read the .env file throws a warning if missing
+env = environ.Env(DEBUG=(bool, False), )
+root = environ.Path(__file__) - 2  # move to the root of the project
+env.read_env(root('.env'))  # read the .env file throws a warning if missing
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -32,11 +31,13 @@ SECRET_KEY = '+%)%&^nk&$oh8b8y8_haz_hh*z2=o+32$+w-=b5!y0dl70@c5x'
 DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = ['serveup-backend.herokuapp.com']
+INTERNAL_IPS = ['127.0.0.1']
 
 # Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
+    'django.contrib.admindocs',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'ServeUp.apps.ServeupConfig',
     'rest_framework',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -54,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'ServeUp_BackEnd.urls'
@@ -102,6 +105,9 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# AUTH_USER_MODEL = 'accounts.User'
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
