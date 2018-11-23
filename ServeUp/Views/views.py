@@ -34,6 +34,18 @@ class PostaViewSet(viewsets.ModelViewSet):
     model = Posta
 
 
+class TipRestavracijeViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet provides 'list', 'create', 'retrieve', 'update' and 'destroy' actions
+
+    Additional actions can be added using '@action()' decorator, default response
+    is GET, you can add POST using 'methods' argument
+    """
+    serializer_class = TipRestavracijeSerializer
+    queryset = TipRestavracije.objects.all()
+    model = TipRestavracije
+
+
 class AdminUporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = AdminUporabnikSerializer
     queryset = AdminUporabnik.objects.all()

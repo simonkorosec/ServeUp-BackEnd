@@ -6,6 +6,12 @@ Convert received data from JSON to Django model and the other way around
 """
 
 
+class TipRestavracijeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TipRestavracije
+        fields = '__all__'
+
+
 class RestavracijaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restavracija
