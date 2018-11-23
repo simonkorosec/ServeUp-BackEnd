@@ -18,6 +18,47 @@ class RestavracijaViewSet(viewsets.ModelViewSet):
     queryset = Restavracija.objects.all()
     serializer_class = RestavracijaSerializer
 
+    @action(detail=False, methods=['POST'])
+    def register(self, request):
+        """
+        The function receives a JSON data with the admin email, restaurant name,
+        restaurant type, address and rating
+        Return values
+        status: 0 - Error, 1 - OK
+        description: Short description of Error or confirm desired action
+        """
+
+        # Get admin id
+        query = AdminUporabnik.objects.all().filter(email=request.data['email'])
+        id_admin = AdminUporabnikSerializer(query, many=True).data[0]['id']
+
+        # Get address id
+        address = request.data['naslov'].split(', ')[0].split(' ')
+        street = " ".join(address[:-1])
+        number = address[-1]
+        query = Naslov.objects.all().filter(ulica=street).filter(hisna_stevilka=number)
+        id_address = NaslovSerializer(query, many=True).data[0]['id_naslov']
+
+        # Build JSON object
+        data = {}
+        data['id_admin'] = id_admin
+        data['ime_restavracije'] = request.data['ime_restavracije']
+        data['id_tip_restavracije'] = request.data['id_tip_restavracije']
+        data['id_naslov'] = id_address
+        data['ocena'] = request.data['ocena']
+
+        response = {}
+        serializer = RestavracijaSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            response['status'] = 1
+            response['description'] = "Restaurant added to admin"
+            return Response(response, status=status.HTTP_201_CREATED)
+        else:
+            response['status'] = 0
+            response['description'] = serializer.errors
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
 
 class PostaViewSet(viewsets.ModelViewSet):
     """
@@ -51,7 +92,7 @@ class AdminUporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = AdminUporabnik.objects.all()
     model = AdminUporabnik
 
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['POST'])
     def login(self, request):
         """
         The function receives JSON data with the email and the password. If the user exist and the password is
@@ -93,7 +134,7 @@ class AdminUporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             response['description'] = "Username does not exist"
             return Response(response, status=status.HTTP_401_UNAUTHORIZED)
 
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['POST'])
     def register(self, request):
         """
         The function receives JSON data with the email and the password.
@@ -110,9 +151,11 @@ class AdminUporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             response['description'] = "New user created"
             return Response(response, status=status.HTTP_201_CREATED)
         else:
-            email_error = ("Email - " + serializer.errors['email'][0]) if 'email' in serializer.errors else ""
+            email_error = ("Email - " + serializer.errors['email'][
+                0]) if 'email' in serializer.errors else ""
             password_error = (
-                    "Password - " + serializer.errors['password'][0]) if 'password' in serializer.errors else ""
+                "Password - " + serializer.errors['password'][
+                0]) if 'password' in serializer.errors else ""
 
             response['status'] = 0
             response['description'] = "Error: " + email_error + password_error
@@ -124,7 +167,7 @@ class UporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Uporabnik.objects.all()
     model = Uporabnik
 
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['POST'])
     def register(self, request):
         """
         The function receives JSON data with the token of the new user.
@@ -134,7 +177,8 @@ class UporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         description: Short description of Error or confirm desired action
         """
         try:
-            user = Uporabnik.objects.get(id_uporabnik=request.data['id_uporabnik'])
+            user = Uporabnik.objects.get(
+                id_uporabnik=request.data['id_uporabnik'])
         except Uporabnik.DoesNotExist:
             user = None
 

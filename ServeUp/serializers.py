@@ -15,7 +15,9 @@ class TipRestavracijeSerializer(serializers.ModelSerializer):
 class RestavracijaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restavracija
-        fields = ('id_restavracija', 'ime_restavracije', 'ocena', 'id_admin')
+        fields = (
+            'id_restavracija', 'id_naslov', 'id_tip_restavracije', 'id_admin',
+            'ime_restavracije', 'ocena',)
 
 
 class PostaSerializer(serializers.ModelSerializer):
@@ -30,10 +32,15 @@ class UporabnikSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class NaslovSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Naslov
+        fields = '__all__'
+
 class AdminUporabnikSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdminUporabnik
-        fields = ('email', 'password')
+        fields = ('id', 'email', 'password')
         write_only_fields = ['password']
 
     def create(self, validated_data):

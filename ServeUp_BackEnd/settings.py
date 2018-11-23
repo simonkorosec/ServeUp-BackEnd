@@ -128,3 +128,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 django_heroku.settings(locals())
+# UNCOMMENT WHEN RUNNING ON LOCALHOST
+# solves server does not support SSL, but SSL was required error
+# del DATABASES['default']['OPTIONS']['sslmode']
