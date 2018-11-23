@@ -8,6 +8,7 @@ router.register(r'restavracija', views.RestavracijaViewSet)
 router.register(r'posta', views.PostaViewSet, basename="posta")
 router.register(r'admin_user', views.AdminUporabnikViewSet, basename="admin_user")
 router.register(r'user', views.UporabnikViewSet, basename="user")
+router.register(r'restaurant_type', views.TipRestavracijeViewSet, basename="restaurant_type")
 
 # The API URLs are determined by the router
 urlpatterns = [
