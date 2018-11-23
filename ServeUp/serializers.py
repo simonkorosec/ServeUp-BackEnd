@@ -9,13 +9,19 @@ Convert received data from JSON to Django model and the other way around
 class RestavracijaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restavracija
-        fields = ('ime_restavracije', 'ocena')
+        fields = ('id_restavracija', 'ime_restavracije', 'ocena', 'id_admin')
 
 
 class PostaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Posta
         fields = ('postna_stevilka', 'kraj')
+
+
+class UporabnikSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Uporabnik
+        fields = '__all__'
 
 
 class AdminUporabnikSerializer(serializers.ModelSerializer):

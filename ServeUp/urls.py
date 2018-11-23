@@ -6,7 +6,8 @@ from ServeUp.Views import views
 router = DefaultRouter()
 router.register(r'restavracija', views.RestavracijaViewSet)
 router.register(r'posta', views.PostaViewSet, basename="posta")
-router.register(r'admin_uporabnik', views.AdminUporabnikViewSet, basename="admin_uporabnik")
+router.register(r'admin_user', views.AdminUporabnikViewSet, basename="admin_user")
+router.register(r'user', views.UporabnikViewSet, basename="user")
 
 # The API URLs are determined by the router
 urlpatterns = [

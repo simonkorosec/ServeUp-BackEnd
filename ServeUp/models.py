@@ -101,7 +101,7 @@ class Restavracija(models.Model):
     id_restavracija = models.AutoField(primary_key=True)
     id_naslov = models.ForeignKey(Naslov, models.DO_NOTHING, db_column='id_naslov')
     id_tip_restavracije = models.ForeignKey('TipRestavracije', models.DO_NOTHING, db_column='id_tip_restavracije')
-    email = models.ForeignKey(AdminUporabnik, models.DO_NOTHING, db_column='email')
+    id_admin = models.ForeignKey('AdminUporabnik', on_delete=models.SET_NULL, db_column='id_admin',  blank=True, null=True)
     ime_restavracije = models.TextField()
     ocena = models.FloatField(blank=True, null=True)
 
