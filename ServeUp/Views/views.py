@@ -26,28 +26,58 @@ class RestavracijaViewSet(viewsets.ModelViewSet):
         Return values
         status: 0 - Error, 1 - OK
         description: Short description of Error or confirm desired action
+        additional actions: Set of actions that also had to be performed, in ex. updating address table
         """
+        response = {'status': "",
+                    'description': "",
+                    'additional actions': ""}
 
         # Get admin id
-        query = AdminUporabnik.objects.all().filter(email=request.data['email'])
-        id_admin = AdminUporabnikSerializer(query, many=True).data[0]['id']
+        id_admin = AdminUporabnik.objects.get(email=request.data['email']).id
 
-        # Get address id
-        address = request.data['naslov'].split(', ')[0].split(' ')
-        street = " ".join(address[:-1])
-        number = address[-1]
-        query = Naslov.objects.all().filter(ulica=street).filter(hisna_stevilka=number)
-        id_address = NaslovSerializer(query, many=True).data[0]['id_naslov']
+        # Deal with address id
+        requested_data = request.data['naslov'].split(', ')
+        address = requested_data[0].split(' ')
+        post = requested_data[1].split(' ')
+
+        try:
+            id_address = Naslov.objects.get(ulica=" ".join(address[:-1]), hisna_stevilka=address[-1]).id_naslov
+        except Naslov.DoesNotExist:
+            naslov_data = {'ulica': " ".join(address[:-1]),
+                           'hisna_stevilka': address[-1],
+                           'postna_stevilka': post[0]}
+
+            # Add post to Posta table, if it doesn't exist
+            try:
+                query_posta = Posta.objects.get(postna_stevilka=post[0])
+            except Posta.DoesNotExist:
+                posta_data = {'postna_stevilka': post[0], 'kraj': post[1]}
+                serializer_posta = PostaSerializer(data=posta_data)
+                if serializer_posta.is_valid():
+                    serializer_posta.save()
+                    response['additional actions'] += "\nUpdated Posta table"
+                else:
+                    response['status'] = 0
+                    response['description'] = serializer_posta.errors
+                    return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+            # Add address to Naslov table, if it doesn't exist
+            serializer_naslov = NaslovSerializer(data=naslov_data)
+            if serializer_naslov.is_valid():
+                serializer_naslov.save()
+                response['additional actions'] += "\nUpdated Address table"
+            else:
+                response['status'] = 0
+                response['description'] = serializer_naslov.errors
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            id_address = Naslov.objects.get(ulica=" ".join(address[:-1]), hisna_stevilka=address[-1]).id_naslov
 
         # Build JSON object
-        data = {}
-        data['id_admin'] = id_admin
-        data['ime_restavracije'] = request.data['ime_restavracije']
-        data['id_tip_restavracije'] = request.data['id_tip_restavracije']
-        data['id_naslov'] = id_address
-        data['ocena'] = request.data['ocena']
+        data = {'id_admin': id_admin,
+                'ime_restavracije': request.data['ime_restavracije'],
+                'id_tip_restavracije': request.data['id_tip_restavracije'],
+                'id_naslov': id_address, 'ocena': request.data['ocena']}
 
-        response = {}
         serializer = RestavracijaSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
