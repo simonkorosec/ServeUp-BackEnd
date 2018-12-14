@@ -40,7 +40,7 @@ def get_orders(id_uporabnik, limit=10):
         data = {"id_narocila": order['id_narocila'],
                 "cas_prevzema": order['cas_prevzema'],
                 "cas_narocila": order['cas_narocila'],
-                "id_restavracija": resturant_name,
+                "ime_restavracije": resturant_name,
                 "cena": 0.0,
                 "jedi": []}
 
