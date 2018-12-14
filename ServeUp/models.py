@@ -49,13 +49,13 @@ class Jed(models.Model):
 
 
 class JediNarocila(models.Model):
-    id_jed = models.ForeignKey(Jed, models.DO_NOTHING, db_column='id_jed', primary_key=True)
+    id_tabele = models.AutoField(primary_key=True)
+    id_jed = models.ForeignKey('Jed', models.DO_NOTHING, db_column='id_jed')
     id_narocila = models.ForeignKey('Narocilo', models.DO_NOTHING, db_column='id_narocila')
 
     class Meta:
         managed = False
         db_table = 'jedi_narocila'
-        unique_together = (('id_jed', 'id_narocila'),)
 
 
 class JedilniList(models.Model):
@@ -163,3 +163,15 @@ class RestavracijaPodatki(models.Model):
     class Meta:
         managed = False  # Created from a view. Don't remove.
         db_table = 'restavracija_podatki'
+
+
+class JediNarocilaPodatki(models.Model):
+    id_narocila = models.IntegerField(blank=True, primary_key=True)
+    id_jed = models.IntegerField(blank=True, null=True)
+    ime_jedi = models.TextField(blank=True, null=True)
+    opis_jedi = models.TextField(blank=True, null=True)
+    cena = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        managed = False  # Created from a view. Don't remove.
+        db_table = 'jedi_narocila_podatki'
