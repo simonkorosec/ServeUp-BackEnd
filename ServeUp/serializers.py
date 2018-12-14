@@ -12,6 +12,18 @@ class TipRestavracijeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class NarociloSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Narocilo
+        fields = '__all__'
+
+
+class JediNarocilaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JediNarocila
+        fields = '__all__'
+
+
 class RestavracijaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restavracija
@@ -70,3 +82,10 @@ class RestavracijaPodatkiSerializer(serializers.ModelSerializer):
     class Meta:
         model = RestavracijaPodatki
         fields = '__all__'
+
+
+class NarociloPodatkiSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JediNarocilaPodatki
+        fields = '__all__'
+

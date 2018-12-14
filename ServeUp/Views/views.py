@@ -19,6 +19,47 @@ def get_restaurants(location):
     return RestavracijaPodatkiSerializer(data, many=True).data
 
 
+def get_orders(id_uporabnik, limit=10):
+    """
+    Helper method that return a list of orders for a specific user.
+    :param id_uporabnik: user id
+    :param limit: how many orders to return, default value is 10
+    :return: List of most recent orders for a specific user
+    """
+    response = []
+
+    # Get 'limit' orders for user, sort by time of order descending so we get latest orders
+    orders = NarociloSerializer(Narocilo.objects.filter(id_uporabnik=id_uporabnik).order_by('-cas_narocila')[:limit],
+                                many=True).data
+
+    for order in orders:
+        cena = 0.0
+        resturant_name = RestavracijaSerializer(
+            Restavracija.objects.get(id_restavracija=order['id_restavracija'])).data['ime_restavracije']
+
+        data = {"id_narocila": order['id_narocila'],
+                "cas_prevzema": order['cas_prevzema'],
+                "cas_narocila": order['cas_narocila'],
+                "id_restavracija": resturant_name,
+                "cena": 0.0,
+                "jedi": []}
+
+        meals_in_order = NarociloPodatkiSerializer(JediNarocilaPodatki.objects.filter(id_narocila=order['id_narocila']),
+                                                many=True).data
+
+        for meal in meals_in_order:
+            meal_data = {"ime_jedi": meal['ime_jedi'],
+                         "cena": meal['cena'],
+                         "opis_jedi": meal['opis_jedi']}
+            cena += meal_data['cena']
+            data['jedi'].append(meal_data)
+
+        data['cena'] = cena
+        response.append(data)
+
+    return response
+
+
 class RestavracijaPodatkiViewSet(viewsets.ModelViewSet):
     """
     ViewSet provides 'list', 'create', 'retrieve', 'update' and 'destroy' actions
@@ -28,6 +69,17 @@ class RestavracijaPodatkiViewSet(viewsets.ModelViewSet):
     """
     queryset = RestavracijaPodatki.objects.all()
     serializer_class = RestavracijaPodatkiSerializer
+
+
+class NarociloViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet provides 'list', 'create', 'retrieve', 'update' and 'destroy' actions
+
+    Additional actions can be added using '@action()' decorator, default response
+    is GET, you can add POST using 'methods' argument
+    """
+    queryset = Narocilo.objects.all()
+    serializer_class = NarociloSerializer
 
 
 class RestavracijaViewSet(viewsets.ModelViewSet):
@@ -42,8 +94,15 @@ class RestavracijaViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['POST'])
     def home(self, request):
+        """
+        The function receives JSON data with the name of a city.
+        Return all restaurants in given city.
+        Return values
+        status: 0 - Error, 1 - OK
+        description: Short description of Error or confirm desired action
+        data: Array of restaurants in given city with their respected data
+        """
         response = {}
-
         try:
             location = request.data['location']
         except Exception:
@@ -237,6 +296,29 @@ class UporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = UporabnikSerializer
     queryset = Uporabnik.objects.all()
     model = Uporabnik
+
+    @action(detail=False, methods=['POST', 'GET'])
+    def get_orders(self, request):
+        response = {}
+        try:
+            id_uporabnik = request.data['id_uporabnik']
+        except Exception:
+            id_uporabnik = None
+
+        try:
+            limit = int(request.data['num_orders'])
+        except Exception:
+            limit = 10
+
+        if id_uporabnik is None:
+            response['status'] = 0
+            response['description'] = "Error: Please input the user id"
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            response['status'] = 1
+            response['description'] = "Orders for user: " + id_uporabnik + ""
+            response['orders'] = get_orders(id_uporabnik, limit)
+            return Response(response, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'])
     def register(self, request):
