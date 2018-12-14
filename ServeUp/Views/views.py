@@ -297,7 +297,7 @@ class UporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Uporabnik.objects.all()
     model = Uporabnik
 
-    @action(detail=False, methods=['POST', 'GET'])
+    @action(detail=False, methods=['POST'])
     def get_orders(self, request):
         response = {}
         try:
