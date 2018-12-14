@@ -127,6 +127,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
 django_heroku.settings(locals())
 # UNCOMMENT WHEN RUNNING ON LOCALHOST
 # solves server does not support SSL, but SSL was required error

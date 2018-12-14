@@ -15,9 +15,7 @@ class TipRestavracijeSerializer(serializers.ModelSerializer):
 class RestavracijaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restavracija
-        fields = (
-            'id_restavracija', 'id_naslov', 'id_tip_restavracije', 'id_admin',
-            'ime_restavracije', 'ocena',)
+        fields = '__all__'
 
 
 class PostaSerializer(serializers.ModelSerializer):
@@ -36,6 +34,7 @@ class NaslovSerializer(serializers.ModelSerializer):
     class Meta:
         model = Naslov
         fields = '__all__'
+
 
 class AdminUporabnikSerializer(serializers.ModelSerializer):
     class Meta:
@@ -65,3 +64,9 @@ class AdminUporabnikSerializer(serializers.ModelSerializer):
                 setattr(instance, attr, value)
         instance.save()
         return instance
+
+
+class RestavracijaPodatkiSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RestavracijaPodatki
+        fields = '__all__'

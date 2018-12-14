@@ -8,6 +8,28 @@ from url_filter.integrations.drf import \
 from ServeUp.serializers import *
 
 
+def get_restaurants(location):
+    """
+    Helper method that return a list of restaurants in the specified location
+    :param location: name of the city
+    :return: list of restaurants
+    """
+    posta = Posta.objects.get(kraj__contains=location)
+    data = RestavracijaPodatki.objects.filter(postna_stevilka=posta.postna_stevilka)
+    return RestavracijaPodatkiSerializer(data, many=True).data
+
+
+class RestavracijaPodatkiViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet provides 'list', 'create', 'retrieve', 'update' and 'destroy' actions
+
+    Additional actions can be added using '@action()' decorator, default response
+    is GET, you can add POST using 'methods' argument
+    """
+    queryset = RestavracijaPodatki.objects.all()
+    serializer_class = RestavracijaPodatkiSerializer
+
+
 class RestavracijaViewSet(viewsets.ModelViewSet):
     """
     ViewSet provides 'list', 'create', 'retrieve', 'update' and 'destroy' actions
@@ -17,6 +39,25 @@ class RestavracijaViewSet(viewsets.ModelViewSet):
     """
     queryset = Restavracija.objects.all()
     serializer_class = RestavracijaSerializer
+
+    @action(detail=False, methods=['POST'])
+    def home(self, request):
+        response = {}
+
+        try:
+            location = request.data['location']
+        except Exception:
+            location = None
+
+        if location is None:
+            response['status'] = 0
+            response['description'] = "Error: Please input the location"
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            response['status'] = 1
+            response['description'] = "Restaurants for city: " + location + "."
+            response['data'] = get_restaurants(location)
+            return Response(response, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'])
     def register(self, request):
@@ -184,7 +225,7 @@ class AdminUporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             email_error = ("Email - " + serializer.errors['email'][
                 0]) if 'email' in serializer.errors else ""
             password_error = (
-                "Password - " + serializer.errors['password'][
+                    "Password - " + serializer.errors['password'][
                 0]) if 'password' in serializer.errors else ""
 
             response['status'] = 0
@@ -207,8 +248,7 @@ class UporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         description: Short description of Error or confirm desired action
         """
         try:
-            user = Uporabnik.objects.get(
-                id_uporabnik=request.data['id_uporabnik'])
+            user = Uporabnik.objects.get(id_uporabnik=request.data['id_uporabnik'])
         except Uporabnik.DoesNotExist:
             user = None
 
