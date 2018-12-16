@@ -73,6 +73,7 @@ class Narocilo(models.Model):
     id_uporabnik = models.ForeignKey('Uporabnik', models.DO_NOTHING, db_column='id_uporabnik')
     cas_prevzema = models.DateTimeField()
     cas_narocila = models.DateTimeField()
+    status = models.TextField()
 
     class Meta:
         managed = False

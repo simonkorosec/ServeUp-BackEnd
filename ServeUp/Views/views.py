@@ -14,7 +14,7 @@ def get_restaurants(location):
     :param location: name of the city
     :return: list of restaurants
     """
-    posta = Posta.objects.get(kraj__contains=location)
+    posta = Posta.objects.get(kraj__icontains=location)
     data = RestavracijaPodatki.objects.filter(postna_stevilka=posta.postna_stevilka)
     return RestavracijaPodatkiSerializer(data, many=True).data
 
@@ -42,10 +42,11 @@ def get_orders(id_uporabnik, limit=10):
                 "cas_narocila": order['cas_narocila'],
                 "ime_restavracije": resturant_name,
                 "cena": 0.0,
+                "status": order['status'],
                 "jedi": []}
 
         meals_in_order = NarociloPodatkiSerializer(JediNarocilaPodatki.objects.filter(id_narocila=order['id_narocila']),
-                                                many=True).data
+                                                   many=True).data
 
         for meal in meals_in_order:
             meal_data = {"ime_jedi": meal['ime_jedi'],
@@ -98,9 +99,10 @@ class RestavracijaViewSet(viewsets.ModelViewSet):
         The function receives JSON data with the name of a city.
         Return all restaurants in given city.
         Return values
-        status: 0 - Error, 1 - OK
+        status: 0 - Error
         description: Short description of Error or confirm desired action
-        data: Array of restaurants in given city with their respected data
+
+        If valid input return only array of restaurants, request by Urban.
         """
         response = {}
         try:
@@ -113,9 +115,7 @@ class RestavracijaViewSet(viewsets.ModelViewSet):
             response['description'] = "Error: Please input the location"
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         else:
-            response['status'] = 1
-            response['description'] = "Restaurants for city: " + location + "."
-            response['data'] = get_restaurants(location)
+            response = get_restaurants(location)
             return Response(response, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'])
