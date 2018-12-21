@@ -1,4 +1,3 @@
-# This is an auto-generated Django model module.
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from ServeUp.Views.userManager import MyUserManager
@@ -22,16 +21,6 @@ class AdminUporabnik(AbstractBaseUser):
         managed = False
         db_table = 'admin_uporabnik'
 
-    # def has_perm(self, perm, obj=None):
-    #     """Does the user have a specific permission?"""
-    #     # Simplest possible answer: Yes, always
-    #     return True
-    #
-    # def has_module_perms(self, app_label):
-    #     """Does the user have permissions to view the app `app_label`?"""
-    #     # Simplest possible answer: Yes, always
-    #     return True
-
 
 class Jed(models.Model):
     id_jed = models.AutoField(primary_key=True)
@@ -49,9 +38,10 @@ class Jed(models.Model):
 
 
 class JediNarocila(models.Model):
-    id_tabele = models.AutoField(primary_key=True)
-    id_jed = models.ForeignKey('Jed', models.DO_NOTHING, db_column='id_jed')
-    id_narocila = models.ForeignKey('Narocilo', models.DO_NOTHING, db_column='id_narocila')
+    id_jedi_narocila = models.AutoField(primary_key=True)
+    id_jed = models.ForeignKey('Jed', on_delete=models.CASCADE, db_column='id_jed')
+    id_narocila = models.ForeignKey('Narocilo', on_delete=models.CASCADE, db_column='id_narocila')
+    kolicina = models.IntegerField()
 
     class Meta:
         managed = False
@@ -172,6 +162,7 @@ class JediNarocilaPodatki(models.Model):
     ime_jedi = models.TextField(blank=True, null=True)
     opis_jedi = models.TextField(blank=True, null=True)
     cena = models.FloatField(blank=True, null=True)
+    kolicina = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False  # Created from a view. Don't remove.

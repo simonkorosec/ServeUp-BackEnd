@@ -2,63 +2,11 @@ from django.contrib.auth.hashers import check_password
 from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.utils import json
 from url_filter.integrations.drf import \
     DjangoFilterBackend  # https://github.com/miki725/django-url-filter - how to use filters
 
-from ServeUp.serializers import *
-
-
-def get_restaurants(location):
-    """
-    Helper method that return a list of restaurants in the specified location
-    :param location: name of the city
-    :return: list of restaurants
-    """
-    posta = Posta.objects.get(kraj__icontains=location)
-    data = RestavracijaPodatki.objects.filter(postna_stevilka=posta.postna_stevilka)
-    return RestavracijaPodatkiSerializer(data, many=True).data
-
-
-def get_orders(id_uporabnik, limit=10):
-    """
-    Helper method that return a list of orders for a specific user.
-    :param id_uporabnik: user id
-    :param limit: how many orders to return, default value is 10
-    :return: List of most recent orders for a specific user
-    """
-    response = []
-
-    # Get 'limit' orders for user, sort by time of order descending so we get latest orders
-    orders = NarociloSerializer(Narocilo.objects.filter(id_uporabnik=id_uporabnik).order_by('-cas_narocila')[:limit],
-                                many=True).data
-
-    for order in orders:
-        cena = 0.0
-        resturant_name = RestavracijaSerializer(
-            Restavracija.objects.get(id_restavracija=order['id_restavracija'])).data['ime_restavracije']
-
-        data = {"id_narocila": order['id_narocila'],
-                "cas_prevzema": order['cas_prevzema'],
-                "cas_narocila": order['cas_narocila'],
-                "ime_restavracije": resturant_name,
-                "cena": 0.0,
-                "status": order['status'],
-                "jedi": []}
-
-        meals_in_order = NarociloPodatkiSerializer(JediNarocilaPodatki.objects.filter(id_narocila=order['id_narocila']),
-                                                   many=True).data
-
-        for meal in meals_in_order:
-            meal_data = {"ime_jedi": meal['ime_jedi'],
-                         "cena": meal['cena'],
-                         "opis_jedi": meal['opis_jedi']}
-            cena += meal_data['cena']
-            data['jedi'].append(meal_data)
-
-        data['cena'] = cena
-        response.append(data)
-
-    return response
+from ServeUp.Views.helper import *
 
 
 class RestavracijaPodatkiViewSet(viewsets.ModelViewSet):
@@ -81,6 +29,111 @@ class NarociloViewSet(viewsets.ModelViewSet):
     """
     queryset = Narocilo.objects.all()
     serializer_class = NarociloSerializer
+
+    @action(detail=False, methods=['GET'])
+    def refresh(self, request):
+        """
+        Returns new and cancelled orders for a restaurant
+        GET params:
+        id_restavracija: id of the restaurant to refresh orders
+        """
+        get_params = request.query_params
+        response = {}
+
+        try:
+            id_restavracija = get_params['id_restavracija']
+        except KeyError:
+            response['status'] = 0
+            response['description'] = "Missing id, add ?id_restavracija=x to call"
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        new, cancelled = get_new_cancelled_orders(int(id_restavracija))
+        response['status'] = 0
+        response['new_orders'] = new
+        response['cancelled_orders'] = cancelled
+        return Response(response, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'])
+    def cancel_order(self, request):
+        """
+        Receive order id and delete that order from the database effectively cancelling it.
+        Add the order id to the cancelled orders list
+        Return conformation of action or error.
+        """
+        response = {}
+        data = json.load(request)
+        try:
+            order_id = data['id_narocilo']
+        except KeyError as e:
+            response['status'] = 0
+            response['description'] = "Missing key data " + str(e) + ""
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            narocilo = Narocilo.objects.get(id_narocila=order_id)
+            order = {'id_narocila': narocilo.id_narocila, 'id_restavracija': narocilo.id_restavracija.id_restavracija}
+            narocilo.delete()
+            add_cancelled_order(order)
+            response['status'] = 1
+            response['description'] = "Successfully deleted order"
+            return Response(response, status=status.HTTP_200_OK)
+        except Exception:
+            response['status'] = 0
+            response['description'] = "Could not delete order {}".format(order_id)
+            return Response(response, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+    @action(detail=False, methods=['POST'])
+    def new_order(self, request):
+        """
+        The function receives JSON data with the details of a new order and stores it.
+        Return values
+        status: 0 - Error, 1 - Successfully added
+        description: Short description of Error or confirm desired action
+        """
+        response = {}
+        data = json.load(request)
+
+        try:
+            order = {
+                "cas_prevzema": data['cas_prevzema'],
+                "cas_narocila": data['cas_narocila'],
+                "id_restavracija": data['id_restavracija'],
+                "id_uporabnik": data['id_uporabnik'],
+                "status": ORDER_NEW
+            }
+            meals = data['jedi']
+        except KeyError as e:
+            response['status'] = 0
+            response['description'] = "Missing key data " + str(e) + ""
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        if len(meals) == 0:  # If there are no meals in order wrong formatting
+            response['status'] = 0
+            response['description'] = "No meal data"
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = NarociloSerializer(data=order)
+        if serializer.is_valid():
+            narocilo = serializer.save()
+            id_narocila = narocilo.id_narocila
+
+            success, price = add_meals_to_order(meals, id_narocila)
+            if not success:  # Something went wrong delete order
+                narocilo.delete()
+                response['status'] = 0
+                response['description'] = "Could not insert meals"
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+            data['cena'] = price
+            data['id_narocila'] = id_narocila
+            add_new_order(data)
+            response['status'] = 1
+            response['description'] = "New order created"
+            return Response(response, status=status.HTTP_201_CREATED)
+        else:
+            response['status'] = 0
+            response['description'] = "Could not add new order"
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RestavracijaViewSet(viewsets.ModelViewSet):
@@ -281,11 +334,9 @@ class AdminUporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             response['description'] = "New user created"
             return Response(response, status=status.HTTP_201_CREATED)
         else:
-            email_error = ("Email - " + serializer.errors['email'][
-                0]) if 'email' in serializer.errors else ""
+            email_error = ("Email - " + serializer.errors['email'][0]) if 'email' in serializer.errors else ""
             password_error = (
-                    "Password - " + serializer.errors['password'][
-                0]) if 'password' in serializer.errors else ""
+                    "Password - " + serializer.errors['password'][0]) if 'password' in serializer.errors else ""
 
             response['status'] = 0
             response['description'] = "Error: " + email_error + password_error
@@ -299,6 +350,9 @@ class UporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     @action(detail=False, methods=['POST'])
     def get_orders(self, request):
+        """
+        Return all orders and meal data for given user
+        """
         response = {}
         try:
             id_uporabnik = request.data['id_uporabnik']
@@ -351,3 +405,23 @@ class UporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             response['status'] = 2
             response['description'] = "User already registered"
             return Response(response, status=status.HTTP_200_OK)
+
+
+class JedViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    serializer_class = JedSerializer
+    queryset = Jed.objects.all()
+    model = Jed
+
+    @action(detail=False, methods=['POST'])
+    def new_meal(self, request):
+        """
+        Create new meal
+        """
+        serializer = JedSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            response = {'status': 1, 'description': "New meal created"}
+            return Response(response, status=status.HTTP_201_CREATED)
+        else:
+            response = {'status': 0, 'description': "Could not create meal"}
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)

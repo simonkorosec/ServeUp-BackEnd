@@ -89,3 +89,8 @@ class NarociloPodatkiSerializer(serializers.ModelSerializer):
         model = JediNarocilaPodatki
         fields = '__all__'
 
+
+class JedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Jed
+        fields = '__all__'
