@@ -30,6 +30,48 @@ class NarociloViewSet(viewsets.ModelViewSet):
     queryset = Narocilo.objects.all()
     serializer_class = NarociloSerializer
 
+    def list(self, request, *args, **kwargs):
+        get_params = request.query_params
+        response = {}
+        return_data = {}
+
+        try:
+            id_restavracija = get_params['id_restavracija']
+        except KeyError:
+            response['status'] = 0
+            response['description'] = "Missing id, add ?id_restavracija=x to call"
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        data = JediNarocilaPodatki.objects.filter(id_restavracija=id_restavracija,
+                                                  status__in=[ORDER_NEW, ORDER_DONE, ORDER_PREPARING])
+        data = JediNarocilaPodatkiSerializer(data, many=True).data
+
+        for order in data:
+            id_narocila = order['id_narocila']
+            if id_narocila not in return_data:
+                return_data[id_narocila] = {
+                    'cas_prevzema': order['cas_prevzema'],
+                    'cas_narocila': order['cas_narocila'],
+                    'id_restavracija': order['id_restavracija'],
+                    'id_uporabnik': order['id_uporabnik'],
+                    'cena': 0,
+                    'id_narocila': order['id_narocila'],
+                    'status': order['status'],
+                    'jedi': []
+                }
+
+            return_data[id_narocila]['jedi'].append({
+                'id_jed': order['id_jed'],
+                'ime_jedi': order['ime_jedi'],
+                'kolicina': order['kolicina'],
+                'cena': order['cena']
+            })
+            return_data[id_narocila]['cena'] += order['cena']
+
+        response['status'] = 1
+        response['data'] = list(return_data.values())
+        return Response(response, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=['GET'])
     def refresh(self, request):
         """

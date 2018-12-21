@@ -13,6 +13,7 @@ cancelled_orders = defaultdict(list)
 ORDER_NEW = "Nova Naročila"
 ORDER_PREPARING = "V Pripravi"
 ORDER_DONE = "Pripravljeno"
+ORDER_FINISHED = "Končano"
 
 
 def add_new_order(order):

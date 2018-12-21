@@ -157,12 +157,17 @@ class RestavracijaPodatki(models.Model):
 
 
 class JediNarocilaPodatki(models.Model):
+    id_restavracija = models.IntegerField(blank=True, null=True)
     id_narocila = models.IntegerField(blank=True, primary_key=True)
     id_jed = models.IntegerField(blank=True, null=True)
     ime_jedi = models.TextField(blank=True, null=True)
     opis_jedi = models.TextField(blank=True, null=True)
     cena = models.FloatField(blank=True, null=True)
     kolicina = models.IntegerField(blank=True, null=True)
+    status = models.TextField(blank=True, null=True)
+    cas_narocila = models.DateTimeField()
+    cas_prevzema = models.DateTimeField()
+    id_uporabnik = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False  # Created from a view. Don't remove.
