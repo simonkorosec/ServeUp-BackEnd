@@ -31,6 +31,14 @@ class NarociloViewSet(viewsets.ModelViewSet):
     serializer_class = NarociloSerializer
 
     def list(self, request, *args, **kwargs):
+        """
+        Returns all active orders for restaurant with specified id in GET parameter 'id_restavracija'.
+        An order is active if its status is one of ORDER_NEW, ORDER_DONE, ORDER_PREPARING constants.
+
+        ORDER_NEW = "Nova Naročila"
+        ORDER_PREPARING = "V Pripravi"
+        ORDER_DONE = "Pripravljeno"
+        """
         get_params = request.query_params
         response = {}
         return_data = {}
@@ -111,6 +119,7 @@ class NarociloViewSet(viewsets.ModelViewSet):
             response['description'] = "Missing key data " + str(e) + ""
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
+        # noinspection PyBroadException
         try:
             narocilo = Narocilo.objects.get(id_narocila=order_id)
             order = {'id_narocila': narocilo.id_narocila, 'id_restavracija': narocilo.id_restavracija.id_restavracija}
@@ -202,7 +211,7 @@ class RestavracijaViewSet(viewsets.ModelViewSet):
         response = {}
         try:
             location = request.data['location']
-        except Exception:
+        except KeyError:
             location = None
 
         if location is None:
@@ -244,7 +253,7 @@ class RestavracijaViewSet(viewsets.ModelViewSet):
 
             # Add post to Posta table, if it doesn't exist
             try:
-                query_posta = Posta.objects.get(postna_stevilka=post[0])
+                Posta.objects.get(postna_stevilka=post[0])
             except Posta.DoesNotExist:
                 posta_data = {'postna_stevilka': post[0], 'kraj': post[1]}
                 serializer_posta = PostaSerializer(data=posta_data)
@@ -398,12 +407,12 @@ class UporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         response = {}
         try:
             id_uporabnik = request.data['id_uporabnik']
-        except Exception:
+        except KeyError:
             id_uporabnik = None
 
         try:
             limit = int(request.data['num_orders'])
-        except Exception:
+        except KeyError:
             limit = 10
 
         if id_uporabnik is None:
@@ -453,6 +462,36 @@ class JedViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = JedSerializer
     queryset = Jed.objects.all()
     model = Jed
+
+    def list(self, request, *args, **kwargs):
+        return_data = defaultdict(list)
+        get_params = request.query_params
+
+        try:
+            id_restavracija = get_params['id_restavracija']
+        except KeyError:
+            response = {
+                'status': 0,
+                'description': "Missing id, add ?id_restavracija=x to call"
+            }
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        meal_types = JedilniList.objects.all()
+        meal_types = JedilniListSerializer(meal_types, many=True).data
+        meal_types = {x['id_jedilni_list']: x['vrsta'] for x in meal_types}  # Transform OrderDict to dict
+
+        meals = Jed.objects.filter(id_restavracija=id_restavracija)
+        meals = JedSerializer(meals, many=True).data
+
+        for meal in meals:
+            typ = meal_types[meal['id_jedilni_list']]
+            return_data[typ].append({
+                'ime_jedi': meal['ime_jedi'],
+                'opis_jedi': meal['opis_jedi'],
+                'cena': meal['cena']
+            })
+
+        return Response(return_data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'])
     def new_meal(self, request):

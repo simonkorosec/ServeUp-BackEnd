@@ -100,3 +100,9 @@ class JediNarocilaPodatkiSerializer(serializers.ModelSerializer):
     class Meta:
         model = JediNarocilaPodatki
         fields = '__all__'
+
+
+class JedilniListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JedilniList
+        fields = '__all__'

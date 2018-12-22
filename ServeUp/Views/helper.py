@@ -70,13 +70,13 @@ def get_orders(id_uporabnik, limit=10):
 
     for order in orders:
         cena = 0.0
-        resturant_name = RestavracijaSerializer(
+        restaurant_name = RestavracijaSerializer(
             Restavracija.objects.get(id_restavracija=order['id_restavracija'])).data['ime_restavracije']
 
         data = {"id_narocila": order['id_narocila'],
                 "cas_prevzema": order['cas_prevzema'],
                 "cas_narocila": order['cas_narocila'],
-                "ime_restavracije": resturant_name,
+                "ime_restavracije": restaurant_name,
                 "cena": 0.0,
                 "status": order['status'],
                 "jedi": []}
