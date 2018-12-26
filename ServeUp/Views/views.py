@@ -488,7 +488,8 @@ class JedViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             return_data[typ].append({
                 'ime_jedi': meal['ime_jedi'],
                 'opis_jedi': meal['opis_jedi'],
-                'cena': meal['cena']
+                'cena': meal['cena'],
+                'kolicina': 1
             })
 
         return Response(return_data, status=status.HTTP_200_OK)

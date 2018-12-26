@@ -73,12 +73,19 @@ def get_orders(id_uporabnik, limit=10):
         restaurant_name = RestavracijaSerializer(
             Restavracija.objects.get(id_restavracija=order['id_restavracija'])).data['ime_restavracije']
 
+        if order['status'] == ORDER_NEW :
+            status = 0
+        elif order['status'] == ORDER_PREPARING or order['status'] == ORDER_DONE:
+            status = 1
+        else:
+            status = 2
+
         data = {"id_narocila": order['id_narocila'],
                 "cas_prevzema": order['cas_prevzema'],
                 "cas_narocila": order['cas_narocila'],
                 "ime_restavracije": restaurant_name,
                 "cena": 0.0,
-                "status": order['status'],
+                "status": status,
                 "jedi": []}
 
         meals_in_order = NarociloPodatkiSerializer(JediNarocilaPodatki.objects.filter(id_narocila=order['id_narocila']),
