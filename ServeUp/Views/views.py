@@ -177,10 +177,10 @@ class NarociloViewSet(viewsets.ModelViewSet):
                 response['description'] = "Could not insert meals"
                 return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
-            data['cena'] = price
-            data['id_narocila'] = id_narocila
-            data['status'] = False
-            add_new_order(data)
+            order['cena'] = price
+            order['id_narocila'] = id_narocila
+            order['jedi'] = meals
+            add_new_order(order)
             response['status'] = 1
             response['description'] = "New order created"
             return Response(response, status=status.HTTP_201_CREATED)
