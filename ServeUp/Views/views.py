@@ -65,6 +65,7 @@ class NarociloViewSet(viewsets.ModelViewSet):
                     'cena': 0,
                     'id_narocila': order['id_narocila'],
                     'status': order['status'],
+                    'checked_in': order['checked_in'],
                     'jedi': []
                 }
 
@@ -150,7 +151,8 @@ class NarociloViewSet(viewsets.ModelViewSet):
                 "cas_narocila": data['cas_narocila'],
                 "id_restavracija": data['id_restavracija'],
                 "id_uporabnik": data['id_uporabnik'],
-                "status": ORDER_NEW
+                "status": ORDER_NEW,
+                "checked_in": False
             }
             meals = data['jedi']
         except KeyError as e:
@@ -177,6 +179,7 @@ class NarociloViewSet(viewsets.ModelViewSet):
 
             data['cena'] = price
             data['id_narocila'] = id_narocila
+            data['status'] = False
             add_new_order(data)
             response['status'] = 1
             response['description'] = "New order created"
