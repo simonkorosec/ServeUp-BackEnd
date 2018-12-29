@@ -486,6 +486,7 @@ class JedViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         for meal in meals:
             typ = meal_types[meal['id_jedilni_list']]
             return_data[typ].append({
+                'id_jed': meal['id_jed'],
                 'ime_jedi': meal['ime_jedi'],
                 'opis_jedi': meal['opis_jedi'],
                 'cena': meal['cena'],

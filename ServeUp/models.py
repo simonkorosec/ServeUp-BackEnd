@@ -63,7 +63,7 @@ class Narocilo(models.Model):
     id_uporabnik = models.ForeignKey('Uporabnik', models.DO_NOTHING, db_column='id_uporabnik')
     cas_prevzema = models.DateTimeField()
     cas_narocila = models.DateTimeField()
-    status = models.TextField()
+    status = models.IntegerField()
 
     class Meta:
         managed = False
@@ -164,7 +164,7 @@ class JediNarocilaPodatki(models.Model):
     opis_jedi = models.TextField(blank=True, null=True)
     cena = models.FloatField(blank=True, null=True)
     kolicina = models.IntegerField(blank=True, null=True)
-    status = models.TextField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
     cas_narocila = models.DateTimeField()
     cas_prevzema = models.DateTimeField()
     id_uporabnik = models.IntegerField(blank=True, null=True)

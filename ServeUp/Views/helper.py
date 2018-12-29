@@ -10,10 +10,10 @@ new_orders = defaultdict(list)
 cancelled_orders = defaultdict(list)
 
 # Constants for order status
-ORDER_NEW = "Nova Naročila"
-ORDER_PREPARING = "V Pripravi"
-ORDER_DONE = "Pripravljeno"
-ORDER_FINISHED = "Končano"
+ORDER_NEW = 0  # "Nova Naročila"
+ORDER_PREPARING = 1  # "V Pripravi"
+ORDER_DONE = 2  # "Pripravljeno"
+ORDER_FINISHED = 3  # "Končano"
 
 
 def add_new_order(order):
@@ -73,7 +73,7 @@ def get_orders(id_uporabnik, limit=10):
         restaurant_name = RestavracijaSerializer(
             Restavracija.objects.get(id_restavracija=order['id_restavracija'])).data['ime_restavracije']
 
-        if order['status'] == ORDER_NEW :
+        if order['status'] == ORDER_NEW:
             status = 0
         elif order['status'] == ORDER_PREPARING or order['status'] == ORDER_DONE:
             status = 1
@@ -93,6 +93,7 @@ def get_orders(id_uporabnik, limit=10):
 
         for meal in meals_in_order:
             meal_data = {
+                "id_jed": meal['id_jed'],
                 "ime_jedi": meal['ime_jedi'],
                 "cena": meal['cena'],
                 "opis_jedi": meal['opis_jedi'],
