@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.utils import json
 from url_filter.integrations.drf import \
     DjangoFilterBackend  # https://github.com/miki725/django-url-filter - how to use filters
+from django.forms.models import model_to_dict
 
 from ServeUp.Views.helper import *
 
@@ -187,6 +188,30 @@ class NarociloViewSet(viewsets.ModelViewSet):
         else:
             response['status'] = 0
             response['description'] = "Could not add new order"
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['POST'])
+    def status_update(self, request):
+        response = {'status': "",
+                    'description': ""}
+        order = Narocilo.objects.get(id_narocila=request.data['id_narocilo'])
+        data = model_to_dict(order)
+        data["status"] = request.data["status"]
+
+        if not 0 <= request.data["status"] <= 3:
+            response['status'] = 0
+            response['description'] = "Invalid status value"
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = NarociloSerializer(data=data, instance=order)
+        if serializer.is_valid():
+            serializer.save()
+            response['status'] = 1
+            response['description'] = "Successfully changed status"
+            return Response(response, status=status.HTTP_200_OK)
+        else:
+            response['status'] = 0
+            response['description'] = serializer.errors
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -390,7 +415,7 @@ class AdminUporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         else:
             email_error = ("Email - " + serializer.errors['email'][0]) if 'email' in serializer.errors else ""
             password_error = (
-                    "Password - " + serializer.errors['password'][0]) if 'password' in serializer.errors else ""
+                "Password - " + serializer.errors['password'][0]) if 'password' in serializer.errors else ""
 
             response['status'] = 0
             response['description'] = "Error: " + email_error + password_error
