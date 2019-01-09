@@ -30,7 +30,7 @@ SECRET_KEY = '+%)%&^nk&$oh8b8y8_haz_hh*z2=o+32$+w-=b5!y0dl70@c5x'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = ['serveup-backend.herokuapp.com']
+ALLOWED_HOSTS = ['*']
 INTERNAL_IPS = ['127.0.0.1']
 
 # Application definition
