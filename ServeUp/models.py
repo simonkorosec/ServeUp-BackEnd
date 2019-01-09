@@ -137,6 +137,17 @@ class Nudi(models.Model):
         unique_together = (('id_restavracija', 'id_jedilni_list'),)
 
 
+class Mize(models.Model):
+    id_restavracija = models.ForeignKey('Restavracija', on_delete=models.CASCADE, db_column='id_restavracija',
+                                        primary_key=True)
+    id_miza = models.TextField()
+
+    class Meta:
+        managed = False
+        db_table = 'mize'
+        unique_together = (('id_restavracija', 'id_miza'),)
+
+
 class RestavracijaPodatki(models.Model):
     """
     View for restaurant data.
