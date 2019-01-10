@@ -52,7 +52,7 @@ class NarociloViewSet(viewsets.ModelViewSet):
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
         data = JediNarocilaPodatki.objects.filter(id_restavracija=id_restavracija,
-                                                  status__in=[ORDER_NEW, ORDER_DONE, ORDER_PREPARING])
+                                                  status__in=[ORDER_NEW, ORDER_DONE, ORDER_PREPARING, ORDER_FINISHED])
         data = JediNarocilaPodatkiSerializer(data, many=True).data
 
         for order in data:
