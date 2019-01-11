@@ -33,12 +33,11 @@ class NarociloViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         """
-        Returns all active orders for restaurant with specified id in GET parameter 'id_restavracija'.
-        An order is active if its status is one of ORDER_NEW, ORDER_DONE, ORDER_PREPARING constants.
-
+        Returns all orders for restaurant with specified id in GET parameter 'id_restavracija'.
         ORDER_NEW = "Nova Naročila"
         ORDER_PREPARING = "V Pripravi"
         ORDER_DONE = "Pripravljeno"
+        ORDER_FINISHED = "Zaključeno"
         """
         get_params = request.query_params
         response = {}
@@ -100,7 +99,7 @@ class NarociloViewSet(viewsets.ModelViewSet):
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
         new, cancelled = get_new_cancelled_orders(int(id_restavracija))
-        response['status'] = 0
+        response['status'] = 1
         response['new_orders'] = new
         response['cancelled_orders'] = cancelled
         return Response(response, status=status.HTTP_200_OK)
@@ -320,6 +319,46 @@ class RestavracijaViewSet(viewsets.ModelViewSet):
             response['status'] = 0
             response['description'] = serializer.errors
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['GET'])
+    def fetch_qr(self, request):
+        """
+        Function receives id_restavracija parameter
+        Returns all QR codes for a given id_restavracija
+        Return values:
+            status: 0 || 1
+            data: JSON array with QR codes
+        """
+
+        get_params = request.query_params
+        response = {}
+        return_data = []
+
+        try:
+            id_restavracija = get_params['id_restavracija']
+        except KeyError:
+            response['status'] = 0
+            response['description'] = "Missing id, add ?id_restavracija=x to call"
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        data = Mize.objects.filter(id_restavracija=id_restavracija)
+        data = MizeSerializer(data, many=True).data
+
+        for obj in data:
+            id_miza = obj['id_miza']
+            if id_miza not in return_data:
+                return_data.append(id_miza)
+
+        response['status'] = 1
+        response['data'] = return_data
+        return Response(response, status=status.HTTP_200_OK)
+
+
+    @action(detail=False, methods=['POST'])
+    def add_table(self, request):
+        # TODO: Add new table for restaurant
+        pass
+
 
 
 class PostaViewSet(viewsets.ModelViewSet):

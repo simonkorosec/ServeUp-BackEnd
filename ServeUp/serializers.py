@@ -106,3 +106,9 @@ class JedilniListSerializer(serializers.ModelSerializer):
     class Meta:
         model = JedilniList
         fields = '__all__'
+
+
+class MizeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Mize
+        fields = '__all__'
