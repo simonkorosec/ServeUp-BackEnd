@@ -353,12 +353,39 @@ class RestavracijaViewSet(viewsets.ModelViewSet):
         response['data'] = return_data
         return Response(response, status=status.HTTP_200_OK)
 
-
     @action(detail=False, methods=['POST'])
     def add_table(self, request):
-        # TODO: Add new table for restaurant
-        pass
+        response = {}
+        data = request.data
 
+        try:
+            id_restavracija = data['id_restavracija']
+            qr = data['qr']
+        except KeyError as e:
+            response['status'] = 0
+            response['description'] = "Missing key data " + str(e) + ""
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        if not len(qr):
+            response['status'] = 0
+            response['description'] = "Missing data"
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        table = {
+            'id_restavracija': id_restavracija,
+            'id_miza': qr
+        }
+
+        serializer = MizeSerializer(data=table)
+        if serializer.is_valid():
+            serializer.save()
+            response['status'] = 1
+            response['description'] = "Successfully added table to restaurant"
+            return Response(response, status=status.HTTP_200_OK)
+        else:
+            response['status'] = 0
+            response['description'] = serializer.errors
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
 
 class PostaViewSet(viewsets.ModelViewSet):

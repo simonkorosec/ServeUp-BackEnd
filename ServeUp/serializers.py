@@ -109,6 +109,9 @@ class JedilniListSerializer(serializers.ModelSerializer):
 
 
 class MizeSerializer(serializers.ModelSerializer):
+    id_restavracija = serializers.PrimaryKeyRelatedField(
+        queryset=Restavracija.objects.all(), write_only=True)
+
     class Meta:
         model = Mize
-        fields = '__all__'
+        fields = ('id_restavracija', 'id_miza')
