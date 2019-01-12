@@ -587,7 +587,8 @@ class UporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         if serializer.is_valid():
             serializer.save()
             # Add order to checked_in array to be used in refresh api call
-            order_dict = {'id_narocila': order.id_narocila, 'id_restavracija': order.id_restavracija.id_restavracija}
+            order_dict = {'id_narocila': order.id_narocila, 'qr': qr,
+                          'id_restavracija': order.id_restavracija.id_restavracija}
             add_checked_in_order(order_dict)
 
             response['status'] = 1
