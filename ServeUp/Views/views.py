@@ -98,10 +98,11 @@ class NarociloViewSet(viewsets.ModelViewSet):
             response['description'] = "Missing id, add ?id_restavracija=x to call"
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
-        new, cancelled = get_new_cancelled_orders(int(id_restavracija))
+        new, cancelled, checked_in = get_new_cancelled_checked_in_orders(int(id_restavracija))
         response['status'] = 1
         response['new_orders'] = new
         response['cancelled_orders'] = cancelled
+        response['checked_in_orders'] = checked_in
         return Response(response, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['POST'])
@@ -550,6 +551,52 @@ class UporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             response['status'] = 2
             response['description'] = "User already registered"
             return Response(response, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['POST'])
+    def check_in(self, request):
+        # TODO: Implement check in from user
+        response = {}
+        try:
+            id_narocila = request.data['id_narocilo']
+            qr = request.data['qr']
+        except KeyError:
+            response['status'] = 0
+            response['description'] = "Error: Missing either id_narocilo or qr"
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        # noinspection PyBroadException
+        try:
+            order = Narocilo.objects.get(id_narocila=id_narocila)
+            order_id_restaurant = order.id_restavracija
+        except Exception:
+            response['status'] = 0
+            response['description'] = "Could not retrieve order {}".format(id_narocila)
+            return Response(response, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+        table_id_restaurant = Mize.objects.get(id_miza=qr).id_restavracija
+
+        if not order_id_restaurant == table_id_restaurant:
+            response['status'] = 0
+            response['description'] = "Error: Restaurant ID and QR do not match for provided Order"
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+        data = model_to_dict(order)
+        data["checked_in"] = True
+
+        serializer = NarociloSerializer(data=data, instance=order)
+        if serializer.is_valid():
+            serializer.save()
+            # Add order to checked_in array to be used in refresh api call
+            order_dict = {'id_narocila': order.id_narocila, 'id_restavracija': order.id_restavracija.id_restavracija}
+            add_checked_in_order(order_dict)
+
+            response['status'] = 1
+            response['description'] = "Successfully checked in order"
+            return Response(response, status=status.HTTP_200_OK)
+        else:
+            response['status'] = 0
+            response['description'] = serializer.errors
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
 
 class JedViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):

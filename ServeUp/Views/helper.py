@@ -9,6 +9,9 @@ new_orders = defaultdict(list)
 # Dictionary that holds an array of every cancelled order since last check for each restaurant
 cancelled_orders = defaultdict(list)
 
+# Dictionary that holds an array of every checked in order since last check for each restaurant
+checked_in_orders = defaultdict(list)
+
 # Constants for order status
 ORDER_NEW = 0  # "Nova Naročila"
 ORDER_PREPARING = 1  # "V Pripravi"
@@ -24,6 +27,15 @@ def add_new_order(order):
     new_orders[order['id_restavracija']].append(order)
 
 
+def add_checked_in_order(order):
+    """
+    Add new order to list
+    :param order: Dictionary that holds the order details
+    """
+    checked_in_orders[order['id_restavracija']].append(order['id_narocila'])
+    print(checked_in_orders)
+
+
 def add_cancelled_order(order):
     """
     Add a cancelled order to list
@@ -32,16 +44,18 @@ def add_cancelled_order(order):
     cancelled_orders[order['id_restavracija']].append(order['id_narocila'])
 
 
-def get_new_cancelled_orders(restaurant_id):
+def get_new_cancelled_checked_in_orders(restaurant_id):
     """
-    Return both arrays and reset new_orders and cancelled_orders for specific restaurant
-    :return: Tuple of (new_orders, cancelled_orders)
+    Return all three arrays and reset new_orders, cancelled_orders and checked_in_orders for specific restaurant
+    :return: Tuple of (new_orders, cancelled_orders, checked_in_orders)
     """
     tmp_new = copy.deepcopy(new_orders[restaurant_id])
     tmp_cancelled = copy.deepcopy(cancelled_orders[restaurant_id])
+    tmp_checked_in = copy.deepcopy(checked_in_orders[restaurant_id])
     new_orders[restaurant_id].clear()
     cancelled_orders[restaurant_id].clear()
-    return tmp_new, tmp_cancelled
+    checked_in_orders[restaurant_id].clear()
+    return tmp_new, tmp_cancelled, tmp_checked_in
 
 
 def get_restaurants(location):
