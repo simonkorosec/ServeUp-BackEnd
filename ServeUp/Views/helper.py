@@ -113,7 +113,7 @@ def get_orders(id_uporabnik, limit=10):
                 "opis_jedi": meal['opis_jedi'],
                 "kolicina": meal['kolicina']
             }
-            cena += meal_data['cena']
+            cena += meal_data['cena'] * meal_data['kolicina']
             data['jedi'].append(meal_data)
 
         data['cena'] = cena
