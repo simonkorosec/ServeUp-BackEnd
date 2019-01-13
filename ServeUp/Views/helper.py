@@ -32,8 +32,7 @@ def add_checked_in_order(order):
     Add new order to list
     :param order: Dictionary that holds the order details
     """
-    checked_in_orders[order['id_restavracija']].append(order['id_narocila'])
-    print(checked_in_orders)
+    checked_in_orders[order['id_restavracija']].append({'id_narocila': order['id_narocila'], 'qr': order['qr']})
 
 
 def add_cancelled_order(order):
