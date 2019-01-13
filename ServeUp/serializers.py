@@ -114,4 +114,4 @@ class MizeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Mize
-        fields = ('id_restavracija', 'id_miza')
+        fields = '__all__'

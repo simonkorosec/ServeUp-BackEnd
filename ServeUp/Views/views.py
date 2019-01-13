@@ -3,9 +3,8 @@ from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.utils import json
-from url_filter.integrations.drf import \
-    DjangoFilterBackend  # https://github.com/miki725/django-url-filter - how to use filters
 from django.forms.models import model_to_dict
+from django.db.models import ObjectDoesNotExist
 
 from ServeUp.Views.helper import *
 
@@ -551,9 +550,9 @@ class UporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             response['description'] = "Could not retrieve order {}".format(id_narocila)
             return Response(response, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
-        table_id_restaurant = Mize.objects.get(id_miza=qr).id_restavracija
-
-        if not order_id_restaurant == table_id_restaurant:
+        try:
+            Mize.objects.get(id_restavracija=order_id_restaurant, id_miza=qr)
+        except models.ObjectDoesNotExist:
             response['status'] = 0
             response['description'] = "Error: Restaurant ID and QR do not match for provided Order"
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
