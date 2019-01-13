@@ -99,6 +99,7 @@ def get_orders(id_uporabnik, limit=10):
                 "ime_restavracije": restaurant_name,
                 "cena": 0.0,
                 "status": status,
+                "checked_in": order['checked_in'],
                 "jedi": []}
 
         meals_in_order = NarociloPodatkiSerializer(JediNarocilaPodatki.objects.filter(id_narocila=order['id_narocila']),
