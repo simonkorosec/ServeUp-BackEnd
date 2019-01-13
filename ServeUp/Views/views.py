@@ -10,17 +10,6 @@ from django.forms.models import model_to_dict
 from ServeUp.Views.helper import *
 
 
-class RestavracijaPodatkiViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet provides 'list', 'create', 'retrieve', 'update' and 'destroy' actions
-
-    Additional actions can be added using '@action()' decorator, default response
-    is GET, you can add POST using 'methods' argument
-    """
-    queryset = RestavracijaPodatki.objects.all()
-    serializer_class = RestavracijaPodatkiSerializer
-
-
 class NarociloViewSet(viewsets.ModelViewSet):
     """
     ViewSet provides 'list', 'create', 'retrieve', 'update' and 'destroy' actions
@@ -34,10 +23,11 @@ class NarociloViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         """
         Returns all orders for restaurant with specified id in GET parameter 'id_restavracija'.
-        ORDER_NEW = "Nova Naročila"
-        ORDER_PREPARING = "V Pripravi"
-        ORDER_DONE = "Pripravljeno"
-        ORDER_FINISHED = "Zaključeno"
+
+        ORDER_NEW = 0  # "Nova Naročila"
+        ORDER_PREPARING = 1  # "V Pripravi"
+        ORDER_DONE = 2  # "Pripravljeno"
+        ORDER_FINISHED = 3  # "Končano"
         """
         get_params = request.query_params
         response = {}
@@ -66,6 +56,7 @@ class NarociloViewSet(viewsets.ModelViewSet):
                     'id_narocila': order['id_narocila'],
                     'status': order['status'],
                     'checked_in': order['checked_in'],
+                    'id_miza': order['id_miza'],
                     'jedi': []
                 }
 
@@ -389,21 +380,6 @@ class RestavracijaViewSet(viewsets.ModelViewSet):
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
 
 
-class PostaViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet provides 'list', 'create', 'retrieve', 'update' and 'destroy' actions
-
-    Additional actions can be added using '@action()' decorator, default response
-    is GET, you can add POST using 'methods' argument
-    """
-    filter_backends = [DjangoFilterBackend]
-    filter_fields = ['postna_stevilka', 'kraj']
-
-    serializer_class = PostaSerializer
-    queryset = Posta.objects.all()
-    model = Posta
-
-
 class TipRestavracijeViewSet(viewsets.ModelViewSet):
     """
     ViewSet provides 'list', 'create', 'retrieve', 'update' and 'destroy' actions
@@ -484,7 +460,7 @@ class AdminUporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         else:
             email_error = ("Email - " + serializer.errors['email'][0]) if 'email' in serializer.errors else ""
             password_error = (
-                "Password - " + serializer.errors['password'][0]) if 'password' in serializer.errors else ""
+                    "Password - " + serializer.errors['password'][0]) if 'password' in serializer.errors else ""
 
             response['status'] = 0
             response['description'] = "Error: " + email_error + password_error
@@ -584,6 +560,7 @@ class UporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
         data = model_to_dict(order)
         data["checked_in"] = True
+        data["id_miza"] = qr
 
         serializer = NarociloSerializer(data=data, instance=order)
         if serializer.is_valid():

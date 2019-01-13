@@ -65,6 +65,7 @@ class Narocilo(models.Model):
     cas_narocila = models.DateTimeField()
     status = models.IntegerField()
     checked_in = models.BooleanField()
+    id_miza = models.TextField(null=True)
 
     class Meta:
         managed = False
@@ -181,6 +182,7 @@ class JediNarocilaPodatki(models.Model):
     cas_prevzema = models.DateTimeField()
     id_uporabnik = models.IntegerField(blank=True, null=True)
     checked_in = models.BooleanField()
+    id_miza = models.TextField()
 
     class Meta:
         managed = False  # Created from a view. Don't remove.
