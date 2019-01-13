@@ -450,10 +450,12 @@ class AdminUporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             else:
                 query = Restavracija.objects.all().filter(id_admin=user.id)
                 data = RestavracijaSerializer(query, many=True).data
+
                 if len(data) != 0:
                     id_restavracija = data[0]['id_restavracija']
                 else:
                     id_restavracija = None
+
                 response['status'] = 1
                 response['description'] = "Username and password match"
                 response['id_restavracija'] = id_restavracija
