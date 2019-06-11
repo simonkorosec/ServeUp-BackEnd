@@ -2,7 +2,7 @@ environ==1.0
 django-environ==0.4.5
 Django==2.1.9
 django-heroku==0.3.1
-djangorestframework==3.9.0
+djangorestframework==3.9.1
 django-url-filter==0.3.10
 django-debug-toolbar==1.10.1
 django-cors-headers==2.4.0
