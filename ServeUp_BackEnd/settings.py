@@ -13,12 +13,6 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 import os
 import django_heroku
 import environ
-import logging
-
-logging.basicConfig(
-    level = logging.DEBUG,
-    format = '%(name)s %(levelname)s %(message)s',
-)
 
 env = environ.Env(DEBUG=(bool, False), )
 root = environ.Path(__file__) - 2  # move to the root of the project
