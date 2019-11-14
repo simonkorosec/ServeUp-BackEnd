@@ -5,9 +5,12 @@ from rest_framework.response import Response
 from rest_framework.utils import json
 from django.forms.models import model_to_dict
 from django.db.models import ObjectDoesNotExist
-
+import logging
 from ServeUp.Views.helper import *
 
+logger = logging.getLogger(__name__)
+logging.disable(logging.NOTSET)
+logger.setLevel(logging.DEBUG)
 
 class NarociloViewSet(viewsets.ModelViewSet):
     """
@@ -479,6 +482,7 @@ class UporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         response = {}
         try:
             id_uporabnik = request.data['id_uporabnik']
+            logger.info('Id uporabnik:', id_uporabnik)
         except KeyError:
             id_uporabnik = None
 
@@ -488,10 +492,12 @@ class UporabnikViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             limit = 10
 
         if id_uporabnik is None:
+            logger.info('Id uporabnik is None')
             response['status'] = 0
             response['description'] = "Error: Please input the user id"
             return Response(response, status=status.HTTP_400_BAD_REQUEST)
         else:
+            logger.info('Id uporabnik is not None')
             response['status'] = 1
             response['description'] = "Orders for user: " + id_uporabnik + ""
             response['orders'] = get_orders(id_uporabnik, limit)

@@ -180,7 +180,7 @@ class JediNarocilaPodatki(models.Model):
     status = models.IntegerField(blank=True, null=True)
     cas_narocila = models.DateTimeField()
     cas_prevzema = models.DateTimeField()
-    id_uporabnik = models.IntegerField(blank=True, null=True)
+    id_uporabnik = models.TextField(blank=True, null=True)
     checked_in = models.BooleanField()
     id_miza = models.TextField()
 
