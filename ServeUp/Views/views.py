@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from rest_framework.utils import json
 from django.forms.models import model_to_dict
 from django.db.models import ObjectDoesNotExist
-import logging
 from ServeUp.Views.helper import *
 
 class NarociloViewSet(viewsets.ModelViewSet):
