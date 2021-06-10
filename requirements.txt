@@ -1,6 +1,6 @@
 environ==1.0
 django-environ==0.4.5
-Django==2.2.10
+Django==2.2.24
 django-heroku==0.3.1
 djangorestframework==3.10.3
 django-url-filter==0.3.10
